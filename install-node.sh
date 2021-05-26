@@ -61,9 +61,6 @@ docker info | grep -i "cgroup"
 
 systemctl enable kubelet && systemctl start kubelet
 
-HOST_IP=`/sbin/ifconfig eth1 | egrep -o 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'  | cut -d' ' -f2`
-ip route add 10.96.0.0/16 dev eth1 src ${HOST_IP}
-
 #Pull images
 kubeadm config images pull
 
