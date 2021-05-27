@@ -69,4 +69,3 @@ apt-get clean && apt-get autoremove -y
 mkdir -p /etc/k8s-scripts
 cp /vagrant/master.sh -p /etc/k8s-scripts/
 cp /vagrant/worker.sh -p /etc/k8s-scripts/
-cat /dev/null > ~/bash_history && history -c
