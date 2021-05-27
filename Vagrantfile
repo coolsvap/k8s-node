@@ -8,19 +8,14 @@ Vagrant.configure("2") do |config|
     l.memory = ENV["NODE_MEMORY"]
   end
 
+  config.vm.synced_folder ".", "/vagrant"
   config.vm.provision :shell, :path => "install-node.sh"
   config.hostmanager.enabled = true
   config.hostmanager.manage_guest = true
-  # config.vm.network "public_network"
+  config.vm.provision :file, source: './master.sh', destination:  "/opt"
 
-  if ENV["SETUP_MASTER"]
-    config.vm.define ENV["MASTER_HOSTNAME"] do |subconfig|
-      subconfig.vm.hostname = ENV["MASTER_HOSTNAME"]
-      subconfig.vm.network :private_network, ip: ENV["MASTER_IP"]
-      subconfig.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--cpus", ENV["MASTER_CPU"]]
-        vb.customize ["modifyvm", :id, "--memory", ENV["MASTER_MEMORY"]]
-      end
-    end
+  config.vm.define ENV["HOSTNAME"] do |subconfig|
+    subconfig.vm.hostname = ENV["HOSTNAME"]
   end
 end  
+
