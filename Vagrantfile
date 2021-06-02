@@ -8,14 +8,18 @@ Vagrant.configure("2") do |config|
     l.memory = ENV["NODE_MEMORY"]
   end
 
-  config.vm.synced_folder ".", "/vagrant"
-  config.vm.provision :shell, :path => "install-node.sh"
   config.hostmanager.enabled = true
   config.hostmanager.manage_guest = true
-  config.vm.provision :file, source: './master.sh', destination:  "/opt"
-
-  config.vm.define ENV["HOSTNAME"] do |subconfig|
-    subconfig.vm.hostname = ENV["HOSTNAME"]
+  config.vm.synced_folder ".", "/vagrant"
+  config.vm.provision :shell, :path => "install-ansible.sh"
+   
+  config.vm.define ENV["HOSTNAME"] do |master|
+    master.vm.hostname = ENV["HOSTNAME"]
+    master.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "base.yaml"
+      ansible.extra_vars = {
+        node_ip: "127.0.0.1",
+      }
+    end
   end
-end  
-
+end
