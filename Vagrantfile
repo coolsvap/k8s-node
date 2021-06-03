@@ -19,6 +19,7 @@ Vagrant.configure("2") do |config|
       ansible.playbook = "base.yaml"
       ansible.extra_vars = {
         node_ip: "127.0.0.1",
+        kube_version: ENV["KUBE_VERSION"]
       }
     end
   end
