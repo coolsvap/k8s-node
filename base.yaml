@@ -158,23 +158,23 @@
     apt:
       autoremove: yes
 
-  - name: Create new directory for installer scripts
-    ansible.builtin.file:
-      path: /etc/k8s-scripts
-      state: directory
-      recurse: yes
+#  - name: Create new directory for installer scripts
+#    ansible.builtin.file:
+#      path: /etc/k8s-scripts
+#      state: directory
+#      recurse: yes
 
-  - name: Copy Initialization Scripts
-    copy:
-      src: /vagrant/master.sh
-      dest: /etc/k8s-scripts
-      mode: '0755'
+#  - name: Copy Initialization Scripts
+#    copy:
+#      src: /vagrant/master.sh
+#      dest: /etc/k8s-scripts
+#      mode: '0755'
 
-  - name: Copy Initialization Scripts
-    copy:
-      src: /vagrant/worker.sh
-      dest: /etc/k8s-scripts
-      mode: '0755'
+#  - name: Copy Initialization Scripts
+#    copy:
+#      src: /vagrant/worker.sh
+#      dest: /etc/k8s-scripts
+#      mode: '0755'
   
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
