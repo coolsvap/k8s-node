@@ -5,6 +5,8 @@
   handlers:
     - name: docker status
       service: name=docker state=started
+    - name: kubelet status
+      service: name=kubelet state=started
   tasks:
   - name: Remove existing Docker Kubernetes packages
     apt:
@@ -149,6 +151,9 @@
     with_items:
       - docker
       - kubelet
+    notify:
+      - docker status
+      - kubelet status
 
   - name: Remove useless packages from the cache
     apt:
@@ -158,23 +163,21 @@
     apt:
       autoremove: yes
 
-#  - name: Create new directory for installer scripts
-#    ansible.builtin.file:
-#      path: /etc/k8s-scripts
-#      state: directory
-#      recurse: yes
+  - name: Create new directory for installer scripts
+    ansible.builtin.file:
+      path: /etc/k8s-scripts
+      state: directory
+      recurse: yes
 
-#  - name: Copy Initialization Scripts
-#    copy:
-#      src: /vagrant/master.sh
-#      dest: /etc/k8s-scripts
-#      mode: '0755'
-
-#  - name: Copy Initialization Scripts
-#    copy:
-#      src: /vagrant/worker.sh
-#      dest: /etc/k8s-scripts
-#      mode: '0755'
+  - name: Copy Initialization Scripts
+    ansible.builtin.copy:
+      remote_src: yes
+      src: "{{ item }}"
+      dest: /etc/k8s-scripts
+      mode: '0755'
+    with_items:
+      - master.yaml
+      - worker.yaml
   
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
