@@ -80,7 +80,7 @@
 
   - name: Install secure dashboard
     become: false
-    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard-insecure.yaml"
+    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard.yaml"
     when: insecure_dashboard == 'no'
 
   - name: Install insecure dashboard
@@ -94,3 +94,5 @@
 
   - name: Copy join command to local file
     local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="/etc/.vagrantdata/kubeadm-join"
+  
+  
