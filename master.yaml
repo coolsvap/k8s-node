@@ -77,7 +77,17 @@
     become: false
     command: "kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version={{ kubectl_version.stdout_lines[0] }}"
     when: nw_plugin == 'weave'
-  
+
+  - name: Install secure dashboard
+    become: false
+    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard-insecure.yaml"
+    when: insecure_dashboard == 'no'
+
+  - name: Install insecure dashboard
+    become: false
+    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard-insecure.yaml"
+    when: insecure_dashboard == 'yes'
+
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
     register: join_command

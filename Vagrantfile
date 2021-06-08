@@ -1,6 +1,7 @@
 Vagrant.configure("2") do |config|
   config.env.enable
   config.vm.box = ENV["BOX_IMAGE"]
+  config.vm.box_version = ENV["BOX_VERSION"]
   config.vm.box_check_update = false
 
   config.vm.provider ENV["PROVIDER"] do |l|
@@ -11,7 +12,6 @@ Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.hostmanager.manage_guest = true
   config.vm.synced_folder ".", "/vagrant"
-  config.vm.provision :shell, :path => "install-ansible.sh"
    
   config.vm.define ENV["HOSTNAME"] do |master|
     master.vm.hostname = ENV["HOSTNAME"]
