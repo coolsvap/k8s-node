@@ -21,6 +21,10 @@
       - /var/lib/cni 
       - /opt/cni
 
+  - name: Set custom rc
+    shell: sh /etc/k8s-scripts/set-custom-rc.sh
+    become: false    
+
   - name: Iptables flush filter
     ansible.builtin.iptables:
       flush: yes
@@ -77,10 +81,39 @@
     become: false
     command: "kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version={{ kubectl_version.stdout_lines[0] }}"
     when: nw_plugin == 'weave'
-  
+
+  - name: Install secure dashboard
+    become: false
+    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard.yaml"
+    when: insecure_dashboard == 'no'
+
+  - name: Install insecure dashboard
+    become: false
+    command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard-insecure.yaml"
+    when: insecure_dashboard == 'yes'
+
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
     register: join_command
 
   - name: Copy join command to local file
     local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="/etc/.vagrantdata/kubeadm-join"
+  
+  - name: Get new token
+    shell: kubectl -n kube-system describe secret default | awk '$1=="token:"{print $2}'
+    register: get_token
+  
+  - name: Update the config with token
+    command: "kubectl config set-credentials kubernetes-admin --token={{ get_token.stdout_lines[0] }}"
+  
+  - name: Create new directory for Kubenetes config
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      recurse: yes
+    with_items:
+      - /vagrant/.kube
+    become: true
+
+  - name: Generate and store updated config
+    shell: kubectl config view --raw > /vagrant/.kube/config
