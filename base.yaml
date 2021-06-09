@@ -178,6 +178,7 @@
     with_items:
       - master.yaml
       - worker.yaml
+      - set-custom-rc.sh
   
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
