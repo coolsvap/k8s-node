@@ -5,7 +5,10 @@
   tasks:
   - name: Reset existing cluster components if any
     command: kubeadm reset -f
-  
+
+  - name: Remove default IP route for service network
+    command: "ip route flush 10.96.0.0/16"
+
   - name: Recursively remove directory
     ansible.builtin.file:
       path: "{{ item }}"
@@ -32,8 +35,18 @@
   - name: Configure default IP route for service network
     command: "ip route add 10.96.0.0/16 dev eth1 src {{ ansible_eth1.ipv4.address }}"
 
+  - name: Create custom configuration
+    replace:
+      path: /etc/k8s-init-scripts/kubeadm-config.yaml
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - { regexp: "IPADDRESS", replace: "{{ ansible_eth1.ipv4.address }}" }
+      - { regexp: "HOSTNAME", replace: "{{ ansible_hostname }}" }
+      - { regexp: "PODSUBNET", replace: "{{ pod_network_cidr }}" }
+      
   - name: Initialize the Kubernetes cluster using kubeadm
-    command: kubeadm init --apiserver-advertise-address={{ ansible_eth1.ipv4.address }} --apiserver-cert-extra-sans={{ ansible_eth1.ipv4.address }}  --node-name {{ansible_hostname}} --pod-network-cidr={{ pod_network_cidr }}
+    command: kubeadm init --config /etc/k8s-init-scripts/kubeadm-config.yaml
 
   - name: Create new directory for Kubenetes config
     ansible.builtin.file:
@@ -91,6 +104,10 @@
     become: false
     command: "kubectl apply -f https://raw.githubusercontent.com/coolsvap/cks-prep/main/01-dashboard/dashboard-insecure.yaml"
     when: insecure_dashboard == 'yes'
+  
+  - name: Install metrics server
+    become: false
+    command: "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
 
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
@@ -117,3 +134,9 @@
 
   - name: Generate and store updated config
     shell: kubectl config view --raw > /vagrant/.kube/config
+
+  - name: Create a cron job for approving the nodes
+    ansible.builtin.cron:
+      name: "approve_node_csrs"
+      minute: "*/5"
+      job: "sh /etc/k8s-scripts/approve-nodes.sh"

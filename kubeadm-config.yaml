@@ -1,0 +1,53 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+bootstrapTokens:
+- token: "9a08jv.c0izixklcxtmnze7"
+  description: "kubeadm bootstrap token"
+  ttl: "24h"
+- token: "783bde.3f89s0fje9f38fhf"
+  description: "another bootstrap token"
+  usages:
+  - authentication
+  - signing
+  groups:
+  - system:bootstrappers:kubeadm:default-node-token
+nodeRegistration:
+  name: "HOSTNAME"
+  criSocket: "/var/run/dockershim.sock"
+localAPIEndpoint:
+  advertiseAddress: "IPADDRESS"
+  bindPort: 6443
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+etcd:
+  # one of local or external
+  local:
+    dataDir: "/var/lib/etcd"
+    extraArgs:
+    serverCertSANs:
+      -  "IPADDRESS"
+      -  "HOSTNAME"
+    peerCertSANs:
+      - "IPADDRESS"
+networking:
+  serviceSubnet: "10.96.0.0/12"
+  podSubnet: "PODSUBNET"
+  dnsDomain: "cluster.local"
+kubernetesVersion: "v1.21.1"
+apiServer:
+  extraArgs:
+    authorization-mode: "Node,RBAC"
+  certSANs:
+    -  "IPADDRESS"
+    -  "HOSTNAME"
+  timeoutForControlPlane: 4m0s
+controllerManager: {}
+scheduler: {}
+certificatesDir: "/etc/kubernetes/pki"
+imageRepository: "k8s.gcr.io"
+clusterName: "kubernetes"
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+serverTLSBootstrap: true
