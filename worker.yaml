@@ -3,6 +3,12 @@
   become: true
   gather_facts: yes
   tasks:
+  - name: Set authorized key taken from file
+    authorized_key:
+      user: vagrant
+      state: present
+      key: "{{ lookup('file', '/vagrant/.ssh/id_rsa.pub') }}"
+      
   - name: Reset existing cluster components if any
     command: kubeadm reset -f
 
