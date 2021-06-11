@@ -3,11 +3,18 @@
   become: true
   gather_facts: yes
   tasks:
+  - name: Check war files in release
+    local_action: stat path="/vagrant/.ssh/id_rsa.pub"
+    register: key_file
+
+
   - name: Set authorized key taken from file
     authorized_key:
       user: vagrant
       state: present
       key: "{{ lookup('file', '/vagrant/.ssh/id_rsa.pub') }}"
+    when: key_file.stat.exists == True
+
   
   - name: Reset existing cluster components if any
     command: kubeadm reset -f
@@ -124,7 +131,10 @@
   
   - name: Get new token
     shell: kubectl -n kube-system describe secret default | awk '$1=="token:"{print $2}'
+    delay: 5
+    retries: 3
     register: get_token
+    until: get_token.stdout != ""
   
   - name: Update the config with token
     command: "kubectl config set-credentials kubernetes-admin --token={{ get_token.stdout_lines[0] }}"
@@ -144,5 +154,5 @@
   - name: Create a cron job for approving the nodes
     ansible.builtin.cron:
       name: "approve_node_csrs"
-      minute: "*/5"
+      minute: "*/1"
       job: "sh /etc/k8s-scripts/approve-nodes.sh"
