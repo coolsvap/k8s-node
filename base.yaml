@@ -165,20 +165,25 @@
 
   - name: Create new directory for installer scripts
     ansible.builtin.file:
-      path: /etc/k8s-scripts
+      path: "{{ item }}"
       state: directory
       recurse: yes
+    with_items:
+      - /etc/k8s-scripts
+      - /etc/k8s-init-scripts
 
   - name: Copy Initialization Scripts
     ansible.builtin.copy:
       remote_src: yes
-      src: "{{ item }}"
-      dest: /etc/k8s-scripts
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
       mode: '0755'
     with_items:
-      - master.yaml
-      - worker.yaml
-      - set-custom-rc.sh
-  
+      - { src: /vagrant/master.yaml, dest: /etc/k8s-scripts/master.yaml }
+      - { src: /vagrant/worker.yaml, dest: /etc/k8s-scripts/worker.yaml }
+      - { src: /vagrant/set-custom-rc.sh, dest: /etc/k8s-scripts/set-custom-rc.sh }
+      - { src: /vagrant/kubeadm-config.yaml, dest: /etc/k8s-init-scripts/kubeadm-config.yaml }
+      - { src: /vagrant/approve-nodes.sh, dest: /etc/k8s-scripts/approve-nodes.sh }
+      
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
