@@ -38,7 +38,7 @@
       - /opt/cni
 
   - name: Set custom rc
-    shell: sh /etc/k8s-scripts/set-custom-rc.sh
+    shell: sh /etc/k8s-init-scripts/set-custom-rc.sh
     become: false    
 
   - name: Iptables flush filter
@@ -122,6 +122,22 @@
     become: false
     command: "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
 
+  - name: Create metallb configuration
+    replace:
+      path: /etc/k8s-init-scripts/metallb-config.yaml
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - { regexp: "LB_IPPOOL", replace: "{{ lb_ippool }}" }
+
+  - name: Install MetalLB
+    become: false
+    command: "{{ item}}"
+    with_items:
+      - "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/namespace.yaml"
+      - "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/metallb.yaml"
+      - "kubectl apply -f /etc/k8s-init-scripts/metallb-config.yaml"
+  
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
     register: join_command
@@ -155,4 +171,4 @@
     ansible.builtin.cron:
       name: "approve_node_csrs"
       minute: "*/1"
-      job: "sh /etc/k8s-scripts/approve-nodes.sh"
+      job: "sh /etc/k8s-init-scripts/approve-nodes.sh"
