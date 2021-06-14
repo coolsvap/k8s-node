@@ -181,9 +181,11 @@
     with_items:
       - { src: /vagrant/master.yaml, dest: /etc/k8s-scripts/master.yaml }
       - { src: /vagrant/worker.yaml, dest: /etc/k8s-scripts/worker.yaml }
-      - { src: /vagrant/set-custom-rc.sh, dest: /etc/k8s-scripts/set-custom-rc.sh }
+      - { src: /vagrant/set-custom-rc.sh, dest: /etc/k8s-init-scripts/set-custom-rc.sh }
+      - { src: /vagrant/approve-nodes.sh, dest: /etc/k8s-init-scripts/approve-nodes.sh }
       - { src: /vagrant/kubeadm-config.yaml, dest: /etc/k8s-init-scripts/kubeadm-config.yaml }
-      - { src: /vagrant/approve-nodes.sh, dest: /etc/k8s-scripts/approve-nodes.sh }
+      - { src: /vagrant/metallb-config.yaml, dest: /etc/k8s-init-scripts/metallb-config.yaml }
+     
       
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
