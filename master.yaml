@@ -130,13 +130,17 @@
     with_items:
       - { regexp: "LB_IPPOOL", replace: "{{ lb_ippool }}" }
 
-  - name: Install MetalLB
+  - name: Enable MetalLB
     become: false
     command: "{{ item}}"
     with_items:
       - "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/namespace.yaml"
       - "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.10.2/manifests/metallb.yaml"
       - "kubectl apply -f /etc/k8s-init-scripts/metallb-config.yaml"
+  
+  - name: Enable Ingress
+    become: false
+    command: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.47.0/deploy/static/provider/cloud/deploy.yaml"
   
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
