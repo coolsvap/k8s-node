@@ -69,6 +69,7 @@
     with_items:
       - /home/vagrant/.kube
       - /root/.kube
+      - /vagrant/.kube
 
   - name: Copy file with owner and permissions
     ansible.builtin.copy:
@@ -141,6 +142,16 @@
   - name: Enable Ingress
     become: false
     command: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.47.0/deploy/static/provider/cloud/deploy.yaml"
+  
+  - name: Install Helm
+    become: true
+    command: "{{ item }}"
+    with_items:
+      - "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3"
+      - "chmod 700 get_helm.sh"
+      - "./get_helm.sh"
+      - "rm -rf ./get_helm.sh"
+    when: install_helm == 'yes'
   
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
