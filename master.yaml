@@ -153,6 +153,13 @@
       - "rm -rf ./get_helm.sh"
     when: install_helm == 'yes'
   
+  - name: Enable OLM
+    become: true
+    command: "sh /etc/k8s-init-scripts/enable-olm.sh"
+    when: enable_olm == 'yes'
+    async: 1200
+    poll: 0
+
   - name: Generate join command
     command: kubeadm token create --print-join-command --ttl 0
     register: join_command
