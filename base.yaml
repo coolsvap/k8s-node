@@ -185,7 +185,7 @@
       - { src: /vagrant/approve-nodes.sh, dest: /etc/k8s-init-scripts/approve-nodes.sh }
       - { src: /vagrant/kubeadm-config.yaml, dest: /etc/k8s-init-scripts/kubeadm-config.yaml }
       - { src: /vagrant/metallb-config.yaml, dest: /etc/k8s-init-scripts/metallb-config.yaml }
-     
+      - { src: /vagrant/enable-olm.sh, dest: /etc/k8s-init-scripts/enable-olm.sh }      
       
   - name: Pull Kubernetes images
     shell: kubeadm config images pull
